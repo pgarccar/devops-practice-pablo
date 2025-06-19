@@ -2,37 +2,38 @@ pipeline {
     agent any
 
     environment {
-        REPO_DIR = "${env.WORKSPACE}"
+        GIT_REPO = 'git@github.com:pgarccar/devops-practice-pablo.git'
     }
 
     stages {
         stage('Run tarea') {
             steps {
-                echo "Hola desde el pipeline!"
+                echo 'Hola desde el pipeline!'
             }
         }
 
         stage('Guardar copia del Jenkinsfile') {
             steps {
                 script {
-                    def pipelineText = sh(script: "git show HEAD:Jenkinsfile", returnStdout: true).trim()
-                    def destino = "${env.REPO_DIR}/jenkins/pipelines/Jenkinsfile-${env.BUILD_NUMBER}.groovy"
-                    writeFile file: destino, text: pipelineText
+                    def jenkinsfileContent = sh(
+                        script: "git show HEAD:Jenkinsfile",
+                        returnStdout: true
+                    ).trim()
+
+                    writeFile file: "jenkins/pipelines/Jenkinsfile-${env.BUILD_NUMBER}.groovy", text: jenkinsfileContent
                 }
             }
         }
 
         stage('Hacer commit y push') {
             steps {
-                dir("${env.REPO_DIR}") {
-                    sh """
-                        git config user.email "pablo@example.com"
-                        git config user.name "Pablo DevOps
-                       	git checkout main
-                        git add jenkins/pipelines/Jenkinsfile-${BUILD_NUMBER}.groovy
-                        git commit -m "Backup automático del Jenkinsfile (${BUILD_NUMBER})" || echo "Nada que commitear"
-                        git push origin main
-                    """
+                dir("${env.WORKSPACE}") {
+                    sh 'git config user.email "pablo@example.com"'
+                    sh 'git config user.name "Pablo DevOps"'
+                    sh 'git checkout main'
+                    sh 'git add jenkins/pipelines/Jenkinsfile-${BUILD_NUMBER}.groovy'
+                    sh 'git commit -m "Backup automático del Jenkinsfile (${BUILD_NUMBER})" || echo "Nada que commitear"'
+                    sh 'git push origin main'
                 }
             }
         }
