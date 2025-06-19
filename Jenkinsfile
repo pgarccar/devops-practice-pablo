@@ -27,7 +27,8 @@ pipeline {
                 dir("${env.REPO_DIR}") {
                     sh """
                         git config user.email "pablo@example.com"
-                        git config user.name "Pablo DevOps"
+                        git config user.name "Pablo DevOps
+                       	git checkout main
                         git add jenkins/pipelines/Jenkinsfile-${BUILD_NUMBER}.groovy
                         git commit -m "Backup automático del Jenkinsfile (${BUILD_NUMBER})" || echo "Nada que commitear"
                         git push origin main
