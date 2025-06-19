@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_DIR = "${env.WORKSPACE}"  // directorio clonado desde GitHub
+    }
+
+    stages {
+        stage('Run tarea') {
+            steps {
+                echo "Hola desde el pipeline!"
+            }
+        }
+
+        stage('Guardar copia del Jenkinsfile') {
+            steps {
+                script {
+                    def pipelineText = readFile("${env.WORKSPACE}/Jenkinsfile")
+                    writeFile file: "${env.REPO_DIR}/jenkins/backups/Jenkinsfile-${env.BUILD_NUMBER}.groovy", text: pipelineText
+                }
+            }
+        }
+
+        stage('Hacer commit y push') {
+            steps {
+                dir("${env.REPO_DIR}") {
+                    sh '''
+                      git config user.email "pablo@example.com"
+                      git config user.name "Pablo DevOps"
+                      git add .
+                      git commit -m "Backup pipeline ejecutado #${BUILD_NUMBER}"
+                      git push origin main
+                    '''
+                }
+            }
+        }
+    }
+}
